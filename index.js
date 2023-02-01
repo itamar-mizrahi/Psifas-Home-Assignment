@@ -38,6 +38,21 @@ async function fetchMedicalRecords(token, offset) {
 
 app.post("/statistics", async (req, res) => {
   const token = await getToken(EMAIL);
+  const data = req.body;
+  console.log(Object.values(data));
+  const isICD9 = Object.values(data).every((key) => {
+    return /^(V\d{2}(\.\d{1,2})?|\d{3}(\.\d{1,2})?|E\d{3}(\.\d)?)$/.test(key);
+  });
+  const isICD10 = Object.values(data).every((key) => {
+    return /^[A-TV-Z][0-9][A-Z0-9](\.[A-Z0-9]{1,4})?$/.test(key);
+  });
+console.log(isICD10,isICD9);
+  if (!isICD9 && !isICD10) {
+    console.log('here');
+    return res
+      .status(400)
+      .json({ message: "Data is not in ICD9 or ICD10 format" });
+  }
   if (!token) {
     return res.status(400).json({ message: "Failed to obtain bearer token" });
   }
@@ -53,28 +68,30 @@ app.post("/statistics", async (req, res) => {
 });
 
 app.get("/token", async (req, res) => {
-    try {
-      const response = await axios.get(`${BASE_URL}/token?email=${EMAIL}`);
-      res.send(response.data);
-    } catch (error) {
-      res.status(500).send({ error: error.message });
-    }
-  });
-  
-  app.get("/patients_data_address", async (req, res) => {
-    try {
-      const offset = req.query.offset;
-      const response = await axios.get(`${BASE_URL}/patients_data_address?offset=${offset}`,
+  try {
+    const response = await axios.get(`${BASE_URL}/token?email=${EMAIL}`);
+    res.send(response.data);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.get("/patients_data_address", async (req, res) => {
+  try {
+    const offset = req.query.offset;
+    const response = await axios.get(
+      `${BASE_URL}/patients_data_address?offset=${offset}`,
       {
         headers: {
           Authorization: `Bearer ${BEARER_TOKEN}`,
         },
-      });
-      res.send(response.data);
-    } catch (error) {
-      res.status(500).send({ error: error.message });
-    }
-  });
+      }
+    );
+    res.send(response.data);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
