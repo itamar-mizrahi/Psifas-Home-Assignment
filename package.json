@@ -7,6 +7,13 @@
     "start":" node index.js",
     "test": "jest"
   },
+  "dependencies": {
+    "express": "^4.17.1",
+    "axios": "^0.21.0"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/itamar-mizrahi/Psifas-Home-Assignment.git"
