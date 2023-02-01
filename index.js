@@ -36,10 +36,29 @@ async function fetchMedicalRecords(token, offset) {
   }
 }
 
+function getAmountOfPhenotypesInData(
+  arrayOfPhenotypesFromData,
+  arrayOfPhenotypesFromBody
+) {
+    let counter=0;
+    for (let i in arrayOfPhenotypesFromBody) {
+        for (let j in arrayOfPhenotypesFromData) {
+            if (arrayOfPhenotypesFromBody[i] == arrayOfPhenotypesFromData[j]) {
+                counter++
+                console.log('found ' + arrayOfPhenotypesFromBody[i] + ' in both lists');
+            }
+        }
+    }
+    console.log(counter,'line 52');
+    return counter
+
+}
+
 app.post("/statistics", async (req, res) => {
   const token = await getToken(EMAIL);
   const data = req.body;
-
+  const arrayOfPhenotypesFromBody = Object.values(req.body);
+  console.log(Object.values(req.body));
   const isICD9 = Object.values(data).every((key) => {
     return /^(V\d{2}(\.\d{1,2})?|\d{3}(\.\d{1,2})?|E\d{3}(\.\d)?)$/.test(key);
   });
@@ -47,7 +66,6 @@ app.post("/statistics", async (req, res) => {
   const isICD10 = Object.values(data).every((key) => {
     return /^[A-TV-Z][0-9][A-Z0-9](\.[A-Z0-9]{1,4})?$/.test(key);
   });
-  
 
   if (!isICD9 && !isICD10) {
     return res
@@ -58,17 +76,24 @@ app.post("/statistics", async (req, res) => {
     return res.status(400).json({ message: "Failed to obtain bearer token" });
   }
   let offset = 0;
-  //   let records = [];
+     let phenotypeCounts = 0;
   let medicalRecords = await fetchMedicalRecords(token, offset);
   while (medicalRecords.offset) {
     // records = records.concat(medicalRecords);
-    getObjectFromCSV(`health_records_${offset}`)
-    // console.log(medicalRecords.url);
+    let arrayOfPhenotypesFromData = await getObjectFromCSV(
+      `health_records_${offset}`
+    );
+    // console.log(arrayOfPhenotypesFromData);
+    let counterPerFile=getAmountOfPhenotypesInData(
+      arrayOfPhenotypesFromData,
+      arrayOfPhenotypesFromBody
+    );
+    phenotypeCounts+=counterPerFile
     extractCsv(medicalRecords.url);
     offset += 1;
     medicalRecords = await fetchMedicalRecords(token, offset);
   }
-  return res.status(200).json({ phenotypeCounts: offset });
+  return res.status(200).json({ phenotypeCounts: phenotypeCounts });
 });
 
 app.get("/token", async (req, res) => {

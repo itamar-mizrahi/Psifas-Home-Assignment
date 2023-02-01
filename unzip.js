@@ -60,10 +60,12 @@ async function extractData(nameOfFile) {
 async function getObjectFromCSV(nameOfFile) {
   const data = await extractData(nameOfFile);
   // console.log(data);
-  data.map((data) => {
-    console.log(data['קוד הבחנה']); 
+ let arrayOfPhenotypesFromData= await data.map((data) => {
+    // console.log(data['קוד הבחנה']); 
+    return data['קוד הבחנה']
     
   });
+  return arrayOfPhenotypesFromData;
 }
 
 module.exports = { extractCsv, getObjectFromCSV };
