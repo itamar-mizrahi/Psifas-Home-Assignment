@@ -10,7 +10,7 @@ A service for pulling and analyzing medical records.
 4. The service will be running on http://localhost:3000.
 
 run on postman the url localhost:3000/statistics for results
-## Running the tests
+
 
 1. Run `npm test` to run the tests.
  
