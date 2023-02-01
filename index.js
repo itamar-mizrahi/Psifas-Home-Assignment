@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
-const {extractCsv} = require('./unzip.js')
+const { extractCsv, getObjectFromCSV } = require("./unzip.js");
 const app = express();
 app.use(bodyParser.json());
 
@@ -47,6 +47,7 @@ app.post("/statistics", async (req, res) => {
   const isICD10 = Object.values(data).every((key) => {
     return /^[A-TV-Z][0-9][A-Z0-9](\.[A-Z0-9]{1,4})?$/.test(key);
   });
+  
 
   if (!isICD9 && !isICD10) {
     return res
@@ -57,19 +58,18 @@ app.post("/statistics", async (req, res) => {
     return res.status(400).json({ message: "Failed to obtain bearer token" });
   }
   let offset = 0;
-//   let records = [];
+  //   let records = [];
   let medicalRecords = await fetchMedicalRecords(token, offset);
   while (medicalRecords.offset) {
     // records = records.concat(medicalRecords);
-    console.log(medicalRecords.url);
+    getObjectFromCSV(`health_records_${offset}`)
+    // console.log(medicalRecords.url);
     extractCsv(medicalRecords.url);
     offset += 1;
     medicalRecords = await fetchMedicalRecords(token, offset);
   }
   return res.status(200).json({ phenotypeCounts: offset });
 });
-
-
 
 app.get("/token", async (req, res) => {
   try {
@@ -79,8 +79,6 @@ app.get("/token", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-
-
 
 app.get("/patients_data_address", async (req, res) => {
   try {
