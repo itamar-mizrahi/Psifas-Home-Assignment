@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 const EMAIL = "theitamarmizrahi@gmail.com";
-const BEARER_TOKEN = "7a4894f0e779";
+// const BEARER_TOKEN = "7a4894f0e779"; for dev env only
 const BASE_URL = "https://8rzh7g1f55.execute-api.eu-west-1.amazonaws.com/v1/";
 
 async function getToken(email) {
