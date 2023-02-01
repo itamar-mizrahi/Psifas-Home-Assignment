@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A service for pulling and analyzing medical records.",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": " node index.js",
     "dev": "nodemon index",
@@ -11,7 +12,8 @@
   "dependencies": {
     "axios": "^0.21.0",
     "body-parser": "^1.20.1",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "unzipper": "^0.10.11"
   },
   "devDependencies": {
     "jest": "^26.0.1"

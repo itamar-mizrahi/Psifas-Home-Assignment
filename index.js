@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
-
+const {extractCsv} = require('./unzip.js')
 const app = express();
 app.use(bodyParser.json());
 
@@ -39,16 +39,16 @@ async function fetchMedicalRecords(token, offset) {
 app.post("/statistics", async (req, res) => {
   const token = await getToken(EMAIL);
   const data = req.body;
-  console.log(Object.values(data));
+
   const isICD9 = Object.values(data).every((key) => {
     return /^(V\d{2}(\.\d{1,2})?|\d{3}(\.\d{1,2})?|E\d{3}(\.\d)?)$/.test(key);
   });
+
   const isICD10 = Object.values(data).every((key) => {
     return /^[A-TV-Z][0-9][A-Z0-9](\.[A-Z0-9]{1,4})?$/.test(key);
   });
-console.log(isICD10,isICD9);
+
   if (!isICD9 && !isICD10) {
-    console.log('here');
     return res
       .status(400)
       .json({ message: "Data is not in ICD9 or ICD10 format" });
@@ -57,15 +57,19 @@ console.log(isICD10,isICD9);
     return res.status(400).json({ message: "Failed to obtain bearer token" });
   }
   let offset = 0;
-  let records = [];
+//   let records = [];
   let medicalRecords = await fetchMedicalRecords(token, offset);
-  while (medicalRecords && medicalRecords.offset) {
-    records = records.concat(medicalRecords);
+  while (medicalRecords.offset) {
+    // records = records.concat(medicalRecords);
+    console.log(medicalRecords.url);
+    extractCsv(medicalRecords.url);
     offset += 1;
     medicalRecords = await fetchMedicalRecords(token, offset);
   }
   return res.status(200).json({ phenotypeCounts: offset });
 });
+
+
 
 app.get("/token", async (req, res) => {
   try {
@@ -75,6 +79,8 @@ app.get("/token", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+
+
 
 app.get("/patients_data_address", async (req, res) => {
   try {
