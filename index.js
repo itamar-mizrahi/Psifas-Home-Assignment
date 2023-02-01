@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 const EMAIL = "theitamarmizrahi@gmail.com";
-// const BEARER_TOKEN = "7a4894f0e779"; for dev env only
+const BEARER_TOKEN = "7a4894f0e779"; //for dev env only
 const BASE_URL = "https://8rzh7g1f55.execute-api.eu-west-1.amazonaws.com/v1/";
 
 async function getToken(email) {
@@ -31,7 +31,7 @@ async function fetchMedicalRecords(token, offset) {
     );
     return response.data;
   } catch (error) {
-    console.error(error, "line 35");
+    console.error(error);
     return null;
   }
 }
@@ -51,6 +51,30 @@ app.post("/statistics", async (req, res) => {
   }
   return res.status(200).json({ phenotypeCounts: offset });
 });
+
+app.get("/token", async (req, res) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/token?email=${EMAIL}`);
+      res.send(response.data);
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+  
+  app.get("/patients_data_address", async (req, res) => {
+    try {
+      const offset = req.query.offset;
+      const response = await axios.get(`${BASE_URL}/patients_data_address?offset=${offset}`,
+      {
+        headers: {
+          Authorization: `Bearer ${BEARER_TOKEN}`,
+        },
+      });
+      res.send(response.data);
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
