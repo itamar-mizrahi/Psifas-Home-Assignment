@@ -5,9 +5,9 @@ const { extractCsv, getObjectFromCSV } = require("./unzip.js");
 const app = express();
 app.use(bodyParser.json());
 
-const EMAIL = "theitamarmizrahi@gmail.com";
-const BEARER_TOKEN = "7a4894f0e779"; //for dev env only
-const BASE_URL = "https://8rzh7g1f55.execute-api.eu-west-1.amazonaws.com/v1/";
+const EMAIL = "theitamarmizrahi@gmail.com"; //*for dev env only
+const BEARER_TOKEN = "7a4894f0e779"; //*for dev env only
+const BASE_URL = "https://8rzh7g1f55.execute-api.eu-west-1.amazonaws.com/v1/";//*for dev env only TODO:create prod env
 
 async function getToken(email) {
   try {
@@ -40,18 +40,17 @@ function getAmountOfPhenotypesInData(
   arrayOfPhenotypesFromData,
   arrayOfPhenotypesFromBody
 ) {
-    let counter=0;
-    for (let i in arrayOfPhenotypesFromBody) {
-        for (let j in arrayOfPhenotypesFromData) {
-            if (arrayOfPhenotypesFromBody[i] == arrayOfPhenotypesFromData[j]) {
-                counter++
-                console.log('found ' + arrayOfPhenotypesFromBody[i] + ' in both lists');
-            }
-        }
+  let counter = 0;
+  for (let i in arrayOfPhenotypesFromBody) {
+    for (let j in arrayOfPhenotypesFromData) {
+      if (arrayOfPhenotypesFromBody[i] == arrayOfPhenotypesFromData[j]) {
+        counter++;
+        console.log("found " + arrayOfPhenotypesFromBody[i] + " in both lists");
+      }
     }
-    console.log(counter,'line 52');
-    return counter
-
+  }
+  console.log(counter, "line 52");
+  return counter;
 }
 
 app.post("/statistics", async (req, res) => {
@@ -76,19 +75,17 @@ app.post("/statistics", async (req, res) => {
     return res.status(400).json({ message: "Failed to obtain bearer token" });
   }
   let offset = 0;
-     let phenotypeCounts = 0;
+  let phenotypeCounts = 0;
   let medicalRecords = await fetchMedicalRecords(token, offset);
   while (medicalRecords.offset) {
-    // records = records.concat(medicalRecords);
     let arrayOfPhenotypesFromData = await getObjectFromCSV(
       `health_records_${offset}`
     );
-    // console.log(arrayOfPhenotypesFromData);
-    let counterPerFile=getAmountOfPhenotypesInData(
+    let counterPerFile = getAmountOfPhenotypesInData(
       arrayOfPhenotypesFromData,
       arrayOfPhenotypesFromBody
     );
-    phenotypeCounts+=counterPerFile
+    phenotypeCounts += counterPerFile;
     extractCsv(medicalRecords.url);
     offset += 1;
     medicalRecords = await fetchMedicalRecords(token, offset);

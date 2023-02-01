@@ -5,17 +5,15 @@ const csv = require("csv-parser");
 
 async function extractCsv(url) {
   try {
-    // Download the zip file
     const response = await axios({
       method: "get",
       url: url,
       responseType: "stream",
     });
 
-    // Extract the contents of the zip file
     response.data.pipe(unzipper.Parse()).on("entry", (entry) => {
       const fileName = entry.path;
-      const type = entry.type; // 'Directory' or 'File'
+      const type = entry.type;
 
       if (type === "File" && fileName.endsWith(".csv")) {
         entry.pipe(fs.createWriteStream(fileName));
@@ -59,11 +57,8 @@ async function extractData(nameOfFile) {
 
 async function getObjectFromCSV(nameOfFile) {
   const data = await extractData(nameOfFile);
-  // console.log(data);
- let arrayOfPhenotypesFromData= await data.map((data) => {
-    // console.log(data['קוד הבחנה']); 
-    return data['קוד הבחנה']
-    
+  let arrayOfPhenotypesFromData = await data.map((data) => {
+    return data["קוד הבחנה"];
   });
   return arrayOfPhenotypesFromData;
 }
